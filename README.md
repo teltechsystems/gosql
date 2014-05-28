@@ -6,8 +6,6 @@ Fetch all users
 ```go
 query := gosql.Select().
     From("users", []string{"id", "first_name"})
-
-fmt.Println(query)
 ```
 
 Results in
