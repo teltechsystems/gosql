@@ -5,9 +5,10 @@ import (
 )
 
 type Query struct {
-	from       *table
-	joins      []join
-	whereParts []wherePart
+	from         *table
+	joins        []join
+	whereParts   []wherePart
+	orderByParts []string
 }
 
 func (q *Query) From(tableName string, columns []string) *Query {
@@ -30,6 +31,11 @@ func (q *Query) InnerJoin(tableName string, predicate string, columns []string) 
 
 func (q *Query) LeftJoin(tableName string, predicate string, columns []string) *Query {
 	return q.Join(LEFT_JOIN, tableName, predicate, columns)
+}
+
+func (q *Query) OrderBy(orderByParts []string) *Query {
+	q.orderByParts = orderByParts
+	return q
 }
 
 func (q *Query) String() string {
@@ -61,6 +67,11 @@ func (q *Query) String() string {
 		}
 
 		query += " WHERE (" + strings.Join(predicates, ") AND (") + ")"
+	}
+
+	// Build up the order by clause
+	if len(q.orderByParts) > 0 {
+		query += " ORDER BY " + strings.Join(q.orderByParts, ", ")
 	}
 
 	return query

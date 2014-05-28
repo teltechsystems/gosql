@@ -62,6 +62,30 @@ func TestQueryLeftJoin(t *testing.T) {
 	})
 }
 
+func TestQueryOrderBy(t *testing.T) {
+	Convey("With a simple OrderBy, a valid query should be returned", t, func() {
+		query := &Query{}
+
+		So(len(query.orderByParts), ShouldEqual, 0)
+		query.From("users", []string{"*"}).
+			OrderBy([]string{"users.id ASC"})
+		So(len(query.orderByParts), ShouldEqual, 1)
+
+		So(query.String(), ShouldEqual, "SELECT * FROM users ORDER BY users.id ASC")
+	})
+
+	Convey("With a complex OrderBy, a valid query should be returned", t, func() {
+		query := &Query{}
+
+		So(len(query.orderByParts), ShouldEqual, 0)
+		query.From("users", []string{"*"}).
+			OrderBy([]string{"users.id ASC", "users.first_name DESC"})
+		So(len(query.orderByParts), ShouldEqual, 2)
+
+		So(query.String(), ShouldEqual, "SELECT * FROM users ORDER BY users.id ASC, users.first_name DESC")
+	})
+}
+
 func TestQueryWhere(t *testing.T) {
 	Convey("With a single where condition, a valid query should be returned", t, func() {
 		query := &Query{}
