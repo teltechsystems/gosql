@@ -51,6 +51,17 @@ func TestQueryInnerJoin(t *testing.T) {
 	})
 }
 
+func TestQueryLeftJoin(t *testing.T) {
+	Convey("With a single join chained with a where, a valid query should be returned", t, func() {
+		query := &Query{}
+		query.From("users", []string{"*"}).
+			LeftJoin("payments", "payments.user_id = users.id", []string{"amount"}).
+			Where("payments.amount > ? AND payments.is_approved", 10)
+
+		So(query.String(), ShouldEqual, "SELECT *, amount FROM users LEFT JOIN payments ON payments.user_id = users.id WHERE payments.amount > ? AND payments.is_approved")
+	})
+}
+
 func TestQueryWhere(t *testing.T) {
 	Convey("With a single where condition, a valid query should be returned", t, func() {
 		query := &Query{}

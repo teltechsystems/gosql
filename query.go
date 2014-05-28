@@ -28,6 +28,10 @@ func (q *Query) InnerJoin(tableName string, predicate string, columns []string) 
 	return q.Join(INNER_JOIN, tableName, predicate, columns)
 }
 
+func (q *Query) LeftJoin(tableName string, predicate string, columns []string) *Query {
+	return q.Join(LEFT_JOIN, tableName, predicate, columns)
+}
+
 func (q *Query) String() string {
 	if q.from == nil {
 		return ""
