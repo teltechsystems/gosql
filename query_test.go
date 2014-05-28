@@ -12,6 +12,34 @@ func TestQuery(t *testing.T) {
 	})
 }
 
+func TestQueryJoin(t *testing.T) {
+	Convey("With a single join, a valid query should be returned", t, func() {
+		query := &Query{}
+		query.From("users", []string{"*"})
+
+		So(len(query.joins), ShouldEqual, 0)
+		query.Join(INNER_JOIN, "payments", "payments.user_id = users.id", []string{"amount"})
+		So(len(query.joins), ShouldEqual, 1)
+
+		// A few assertions about the join
+		So(query.joins[0].joinType, ShouldEqual, INNER_JOIN)
+		So(query.joins[0].table.tableName, ShouldEqual, "payments")
+		So(query.joins[0].table.columns, ShouldResemble, []string{"amount"})
+		So(query.joins[0].predicate, ShouldEqual, "payments.user_id = users.id")
+
+		So(query.String(), ShouldEqual, "SELECT *, amount FROM users INNER JOIN payments ON payments.user_id = users.id")
+	})
+
+	Convey("With a single join chained with a where, a valid query should be returned", t, func() {
+		query := &Query{}
+		query.From("users", []string{"*"}).
+			Join(INNER_JOIN, "payments", "payments.user_id = users.id", []string{"amount"}).
+			Where("payments.amount > ? AND payments.is_approved", 10)
+
+		So(query.String(), ShouldEqual, "SELECT *, amount FROM users INNER JOIN payments ON payments.user_id = users.id WHERE payments.amount > ? AND payments.is_approved")
+	})
+}
+
 func TestQueryWhere(t *testing.T) {
 	Convey("With a single where condition, a valid query should be returned", t, func() {
 		query := &Query{}
