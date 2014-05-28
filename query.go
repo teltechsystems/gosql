@@ -2,7 +2,6 @@ package gosql
 
 import (
 	"database/sql"
-	"fmt"
 	"strings"
 )
 
@@ -62,7 +61,6 @@ func (q *Query) Query() (*sql.Rows, error) {
 }
 
 func (q *Query) QueryRow() *sql.Row {
-	fmt.Println(q.String(), q.getArgs())
 	return q.using.QueryRow(q.String(), q.getArgs()...)
 }
 
