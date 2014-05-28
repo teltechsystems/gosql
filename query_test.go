@@ -124,6 +124,29 @@ func TestQueryQuery(t *testing.T) {
 	})
 }
 
+func TestQueryQueryRow(t *testing.T) {
+	Convey("With a query unassociated to a database, should panic", t, func() {
+		query := &Query{}
+
+		defer func() {
+			So(recover(), ShouldNotBeNil)
+		}()
+
+		query.QueryRow()
+	})
+
+	Convey("With a query associated to a database, an error should be returned due to invalid schema", t, func() {
+		db, err := sql.Open("sqlite3", ":memory:")
+		So(err, ShouldBeNil)
+
+		query := Select().From("users", []string{"id"})
+		query.Use(db)
+
+		row := query.QueryRow()
+		So(row, ShouldNotBeNil)
+	})
+}
+
 func TestQueryWhere(t *testing.T) {
 	Convey("With a single where condition, a valid query should be returned", t, func() {
 		query := &Query{}

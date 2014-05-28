@@ -60,6 +60,10 @@ func (q *Query) Query() (*sql.Rows, error) {
 	return q.using.Query(q.String(), q.getArgs()...)
 }
 
+func (q *Query) QueryRow() *sql.Row {
+	return q.using.QueryRow(q.String(), q.getArgs()...)
+}
+
 func (q *Query) String() string {
 	if q.from == nil {
 		return ""
