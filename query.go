@@ -2,6 +2,7 @@ package gosql
 
 import (
 	"database/sql"
+	"fmt"
 	"strings"
 )
 
@@ -61,6 +62,7 @@ func (q *Query) Query() (*sql.Rows, error) {
 }
 
 func (q *Query) QueryRow() *sql.Row {
+	fmt.Println(q.String(), q.getArgs())
 	return q.using.QueryRow(q.String(), q.getArgs()...)
 }
 
@@ -70,10 +72,14 @@ func (q *Query) String() string {
 	}
 
 	// Generate the array of columns including those from joins
-	columns := q.from.columns
+	columns := []string{}
+
+	for i := range q.from.columns {
+		columns = append(columns, q.from.tableName+"."+q.from.columns[i])
+	}
 	for i := range q.joins {
 		for j := range q.joins[i].table.columns {
-			columns = append(columns, q.joins[i].table.columns[j])
+			columns = append(columns, q.joins[i].table.tableName+"."+q.joins[i].table.columns[j])
 		}
 	}
 

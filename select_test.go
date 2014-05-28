@@ -11,11 +11,11 @@ func TestSelect(t *testing.T) {
 		So(query, ShouldNotBeNil)
 		So(query.from, ShouldBeNil)
 
-		query.From("users", []string{"*"})
+		query.From("users", []string{"id"})
 		So(query.from, ShouldHaveSameTypeAs, &table{})
 		So(query.from.tableName, ShouldEqual, "users")
-		So(query.from.columns, ShouldResemble, []string{"*"})
+		So(query.from.columns, ShouldResemble, []string{"id"})
 
-		So(query.String(), ShouldEqual, "SELECT * FROM users")
+		So(query.String(), ShouldEqual, "SELECT users.id FROM users")
 	})
 }

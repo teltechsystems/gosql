@@ -17,7 +17,7 @@ func TestQuery(t *testing.T) {
 func TestQueryJoin(t *testing.T) {
 	Convey("With a single join, a valid query should be returned", t, func() {
 		query := &Query{}
-		query.From("users", []string{"*"})
+		query.From("users", []string{"id"})
 
 		So(len(query.joins), ShouldEqual, 0)
 		query.Join(INNER_JOIN, "payments", "payments.user_id = users.id", []string{"amount"})
@@ -29,38 +29,38 @@ func TestQueryJoin(t *testing.T) {
 		So(query.joins[0].table.columns, ShouldResemble, []string{"amount"})
 		So(query.joins[0].predicate, ShouldEqual, "payments.user_id = users.id")
 
-		So(query.String(), ShouldEqual, "SELECT *, amount FROM users INNER JOIN payments ON payments.user_id = users.id")
+		So(query.String(), ShouldEqual, "SELECT users.id, payments.amount FROM users INNER JOIN payments ON payments.user_id = users.id")
 	})
 
 	Convey("With a single join chained with a where, a valid query should be returned", t, func() {
 		query := &Query{}
-		query.From("users", []string{"*"}).
+		query.From("users", []string{"id"}).
 			Join(INNER_JOIN, "payments", "payments.user_id = users.id", []string{"amount"}).
 			Where("payments.amount > ? AND payments.is_approved", 10)
 
-		So(query.String(), ShouldEqual, "SELECT *, amount FROM users INNER JOIN payments ON payments.user_id = users.id WHERE (payments.amount > ? AND payments.is_approved)")
+		So(query.String(), ShouldEqual, "SELECT users.id, payments.amount FROM users INNER JOIN payments ON payments.user_id = users.id WHERE (payments.amount > ? AND payments.is_approved)")
 	})
 }
 
 func TestQueryInnerJoin(t *testing.T) {
 	Convey("With a single join chained with a where, a valid query should be returned", t, func() {
 		query := &Query{}
-		query.From("users", []string{"*"}).
+		query.From("users", []string{"id"}).
 			InnerJoin("payments", "payments.user_id = users.id", []string{"amount"}).
 			Where("payments.amount > ? AND payments.is_approved", 10)
 
-		So(query.String(), ShouldEqual, "SELECT *, amount FROM users INNER JOIN payments ON payments.user_id = users.id WHERE (payments.amount > ? AND payments.is_approved)")
+		So(query.String(), ShouldEqual, "SELECT users.id, payments.amount FROM users INNER JOIN payments ON payments.user_id = users.id WHERE (payments.amount > ? AND payments.is_approved)")
 	})
 }
 
 func TestQueryLeftJoin(t *testing.T) {
 	Convey("With a single join chained with a where, a valid query should be returned", t, func() {
 		query := &Query{}
-		query.From("users", []string{"*"}).
+		query.From("users", []string{"id"}).
 			LeftJoin("payments", "payments.user_id = users.id", []string{"amount"}).
 			Where("payments.amount > ? AND payments.is_approved", 10)
 
-		So(query.String(), ShouldEqual, "SELECT *, amount FROM users LEFT JOIN payments ON payments.user_id = users.id WHERE (payments.amount > ? AND payments.is_approved)")
+		So(query.String(), ShouldEqual, "SELECT users.id, payments.amount FROM users LEFT JOIN payments ON payments.user_id = users.id WHERE (payments.amount > ? AND payments.is_approved)")
 	})
 }
 
@@ -69,22 +69,22 @@ func TestQueryOrderBy(t *testing.T) {
 		query := &Query{}
 
 		So(len(query.orderByParts), ShouldEqual, 0)
-		query.From("users", []string{"*"}).
+		query.From("users", []string{"id"}).
 			OrderBy([]string{"users.id ASC"})
 		So(len(query.orderByParts), ShouldEqual, 1)
 
-		So(query.String(), ShouldEqual, "SELECT * FROM users ORDER BY users.id ASC")
+		So(query.String(), ShouldEqual, "SELECT users.id FROM users ORDER BY users.id ASC")
 	})
 
 	Convey("With a complex OrderBy, a valid query should be returned", t, func() {
 		query := &Query{}
 
 		So(len(query.orderByParts), ShouldEqual, 0)
-		query.From("users", []string{"*"}).
+		query.From("users", []string{"id"}).
 			OrderBy([]string{"users.id ASC", "users.first_name DESC"})
 		So(len(query.orderByParts), ShouldEqual, 2)
 
-		So(query.String(), ShouldEqual, "SELECT * FROM users ORDER BY users.id ASC, users.first_name DESC")
+		So(query.String(), ShouldEqual, "SELECT users.id FROM users ORDER BY users.id ASC, users.first_name DESC")
 	})
 }
 
@@ -150,7 +150,7 @@ func TestQueryQueryRow(t *testing.T) {
 func TestQueryWhere(t *testing.T) {
 	Convey("With a single where condition, a valid query should be returned", t, func() {
 		query := &Query{}
-		query.From("users", []string{"*"})
+		query.From("users", []string{"id"})
 
 		So(len(query.whereParts), ShouldEqual, 0)
 		query.Where("first_name = ?", "Bryan")
@@ -158,12 +158,12 @@ func TestQueryWhere(t *testing.T) {
 
 		So(query.whereParts[0].args[0].(string), ShouldEqual, "Bryan")
 
-		So(query.String(), ShouldEqual, "SELECT * FROM users WHERE (first_name = ?)")
+		So(query.String(), ShouldEqual, "SELECT users.id FROM users WHERE (first_name = ?)")
 	})
 
 	Convey("With a single where condition containing multiple arguments, a valid query should be returned", t, func() {
 		query := &Query{}
-		query.From("users", []string{"*"})
+		query.From("users", []string{"id"})
 
 		So(len(query.whereParts), ShouldEqual, 0)
 		query.Where("first_name = ? AND last_name = ?", "Bryan", "Moyles")
@@ -172,14 +172,14 @@ func TestQueryWhere(t *testing.T) {
 		So(query.whereParts[0].args[0].(string), ShouldEqual, "Bryan")
 		So(query.whereParts[0].args[1].(string), ShouldEqual, "Moyles")
 
-		So(query.String(), ShouldEqual, "SELECT * FROM users WHERE (first_name = ? AND last_name = ?)")
+		So(query.String(), ShouldEqual, "SELECT users.id FROM users WHERE (first_name = ? AND last_name = ?)")
 	})
 
 	Convey("With multiple where conditions, a valid query should be returned", t, func() {
 		query := &Query{}
 
 		So(len(query.whereParts), ShouldEqual, 0)
-		query.From("users", []string{"*"}).
+		query.From("users", []string{"id"}).
 			Where("first_name = ?", "Bryan").
 			Where("last_name = ?", "Moyles")
 		So(len(query.whereParts), ShouldEqual, 2)
@@ -187,6 +187,6 @@ func TestQueryWhere(t *testing.T) {
 		So(query.whereParts[0].args[0].(string), ShouldEqual, "Bryan")
 		So(query.whereParts[1].args[0].(string), ShouldEqual, "Moyles")
 
-		So(query.String(), ShouldEqual, "SELECT * FROM users WHERE (first_name = ?) AND (last_name = ?)")
+		So(query.String(), ShouldEqual, "SELECT users.id FROM users WHERE (first_name = ?) AND (last_name = ?)")
 	})
 }
