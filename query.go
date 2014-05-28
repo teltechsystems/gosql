@@ -1,6 +1,7 @@
 package gosql
 
 import (
+	"database/sql"
 	"strings"
 )
 
@@ -9,11 +10,24 @@ type Query struct {
 	joins        []join
 	whereParts   []wherePart
 	orderByParts []string
+	using        *sql.DB
 }
 
 func (q *Query) From(tableName string, columns []string) *Query {
 	q.from = &table{tableName, columns}
 	return q
+}
+
+func (q *Query) getArgs() []interface{} {
+	args := make([]interface{}, 0)
+
+	for i := range q.whereParts {
+		for j := range q.whereParts[i].args {
+			args = append(args, q.whereParts[i].args[j])
+		}
+	}
+
+	return args
 }
 
 func (q *Query) Join(joinType string, tableName string, predicate string, columns []string) *Query {
@@ -36,6 +50,14 @@ func (q *Query) LeftJoin(tableName string, predicate string, columns []string) *
 func (q *Query) OrderBy(orderByParts []string) *Query {
 	q.orderByParts = orderByParts
 	return q
+}
+
+func (q *Query) Query() (*sql.Rows, error) {
+	if q.using == nil {
+		return nil, MissingDatabase
+	}
+
+	return q.using.Query(q.String(), q.getArgs()...)
 }
 
 func (q *Query) String() string {
@@ -75,6 +97,11 @@ func (q *Query) String() string {
 	}
 
 	return query
+}
+
+func (q *Query) Use(db *sql.DB) *Query {
+	q.using = db
+	return q
 }
 
 func (q *Query) Where(predicate string, args ...interface{}) *Query {

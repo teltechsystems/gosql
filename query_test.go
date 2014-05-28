@@ -1,6 +1,8 @@
 package gosql
 
 import (
+	_ "code.google.com/p/go-sqlite/go1/sqlite3"
+	"database/sql"
 	. "github.com/smartystreets/goconvey/convey"
 	"testing"
 )
@@ -83,6 +85,42 @@ func TestQueryOrderBy(t *testing.T) {
 		So(len(query.orderByParts), ShouldEqual, 2)
 
 		So(query.String(), ShouldEqual, "SELECT * FROM users ORDER BY users.id ASC, users.first_name DESC")
+	})
+}
+
+func TestQueryUse(t *testing.T) {
+	Convey("A db instance should be able to be associated to the query", t, func() {
+		db, err := sql.Open("sqlite3", ":memory:")
+		So(err, ShouldBeNil)
+
+		query := &Query{}
+
+		So(query.using, ShouldBeNil)
+		query.Use(db)
+		So(query.using, ShouldNotBeNil)
+	})
+}
+
+func TestQueryQuery(t *testing.T) {
+	Convey("With a query unassociated to a database, an error should be returned", t, func() {
+		query := &Query{}
+
+		rows, err := query.Query()
+		So(rows, ShouldBeNil)
+		So(err, ShouldEqual, MissingDatabase)
+	})
+
+	Convey("With a query associated to a database, an error should be returned due to invalid schema", t, func() {
+		db, err := sql.Open("sqlite3", ":memory:")
+		So(err, ShouldBeNil)
+
+		query := Select().From("users", []string{"id"})
+		query.Use(db)
+
+		rows, err := query.Query()
+		So(rows, ShouldBeNil)
+		So(err, ShouldNotBeNil)
+		So(err, ShouldNotEqual, MissingDatabase)
 	})
 }
 
