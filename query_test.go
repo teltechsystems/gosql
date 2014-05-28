@@ -36,7 +36,7 @@ func TestQueryJoin(t *testing.T) {
 			Join(INNER_JOIN, "payments", "payments.user_id = users.id", []string{"amount"}).
 			Where("payments.amount > ? AND payments.is_approved", 10)
 
-		So(query.String(), ShouldEqual, "SELECT *, amount FROM users INNER JOIN payments ON payments.user_id = users.id WHERE payments.amount > ? AND payments.is_approved")
+		So(query.String(), ShouldEqual, "SELECT *, amount FROM users INNER JOIN payments ON payments.user_id = users.id WHERE (payments.amount > ? AND payments.is_approved)")
 	})
 }
 
@@ -47,7 +47,7 @@ func TestQueryInnerJoin(t *testing.T) {
 			InnerJoin("payments", "payments.user_id = users.id", []string{"amount"}).
 			Where("payments.amount > ? AND payments.is_approved", 10)
 
-		So(query.String(), ShouldEqual, "SELECT *, amount FROM users INNER JOIN payments ON payments.user_id = users.id WHERE payments.amount > ? AND payments.is_approved")
+		So(query.String(), ShouldEqual, "SELECT *, amount FROM users INNER JOIN payments ON payments.user_id = users.id WHERE (payments.amount > ? AND payments.is_approved)")
 	})
 }
 
@@ -58,7 +58,7 @@ func TestQueryLeftJoin(t *testing.T) {
 			LeftJoin("payments", "payments.user_id = users.id", []string{"amount"}).
 			Where("payments.amount > ? AND payments.is_approved", 10)
 
-		So(query.String(), ShouldEqual, "SELECT *, amount FROM users LEFT JOIN payments ON payments.user_id = users.id WHERE payments.amount > ? AND payments.is_approved")
+		So(query.String(), ShouldEqual, "SELECT *, amount FROM users LEFT JOIN payments ON payments.user_id = users.id WHERE (payments.amount > ? AND payments.is_approved)")
 	})
 }
 
@@ -73,7 +73,7 @@ func TestQueryWhere(t *testing.T) {
 
 		So(query.whereParts[0].args[0].(string), ShouldEqual, "Bryan")
 
-		So(query.String(), ShouldEqual, "SELECT * FROM users WHERE first_name = ?")
+		So(query.String(), ShouldEqual, "SELECT * FROM users WHERE (first_name = ?)")
 	})
 
 	Convey("With a single where condition containing multiple arguments, a valid query should be returned", t, func() {
@@ -87,7 +87,7 @@ func TestQueryWhere(t *testing.T) {
 		So(query.whereParts[0].args[0].(string), ShouldEqual, "Bryan")
 		So(query.whereParts[0].args[1].(string), ShouldEqual, "Moyles")
 
-		So(query.String(), ShouldEqual, "SELECT * FROM users WHERE first_name = ? AND last_name = ?")
+		So(query.String(), ShouldEqual, "SELECT * FROM users WHERE (first_name = ? AND last_name = ?)")
 	})
 
 	Convey("With multiple where conditions, a valid query should be returned", t, func() {
@@ -102,6 +102,6 @@ func TestQueryWhere(t *testing.T) {
 		So(query.whereParts[0].args[0].(string), ShouldEqual, "Bryan")
 		So(query.whereParts[1].args[0].(string), ShouldEqual, "Moyles")
 
-		So(query.String(), ShouldEqual, "SELECT * FROM users WHERE first_name = ? AND last_name = ?")
+		So(query.String(), ShouldEqual, "SELECT * FROM users WHERE (first_name = ?) AND (last_name = ?)")
 	})
 }

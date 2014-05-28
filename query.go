@@ -60,7 +60,7 @@ func (q *Query) String() string {
 			predicates[i] = q.whereParts[i].predicate
 		}
 
-		query += " WHERE " + strings.Join(predicates, " AND ")
+		query += " WHERE (" + strings.Join(predicates, ") AND (") + ")"
 	}
 
 	return query
