@@ -24,6 +24,12 @@ func TestQuery(t *testing.T) {
 		query.From("users u", []string{"id"})
 		So(query.String(), ShouldEqual, "SELECT u.id FROM users u")
 	})
+
+	Convey("With a function call as a field, the field should not be prefixed", t, func() {
+		query := &Query{}
+		query.From("users u", []string{"MAX(id)"})
+		So(query.String(), ShouldEqual, "SELECT MAX(id) FROM users u")
+	})
 }
 
 func TestQueryGroupBy(t *testing.T) {

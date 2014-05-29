@@ -88,12 +88,20 @@ func (q *Query) String() string {
 	columns := []string{}
 
 	for i := range q.from.columns {
-		columns = append(columns, q.from.GetAlias()+"."+q.from.columns[i])
+		if strings.Index(q.from.columns[i], "(") == -1 {
+			columns = append(columns, q.from.GetAlias()+"."+q.from.columns[i])
+		} else {
+			columns = append(columns, q.from.columns[i])
+		}
 	}
 
 	for i := range q.joins {
 		for j := range q.joins[i].table.columns {
-			columns = append(columns, q.joins[i].table.GetAlias()+"."+q.joins[i].table.columns[j])
+			if strings.Index(q.joins[i].table.columns[j], "(") == -1 {
+				columns = append(columns, q.joins[i].table.GetAlias()+"."+q.joins[i].table.columns[j])
+			} else {
+				columns = append(columns, q.joins[i].table.columns[j])
+			}
 		}
 	}
 
