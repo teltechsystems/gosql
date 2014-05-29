@@ -7,6 +7,7 @@ import (
 
 type Query struct {
 	from         *table
+	groupBy      string
 	joins        []join
 	whereParts   []wherePart
 	orderByParts []string
@@ -36,6 +37,11 @@ func (q *Query) getArgs() []interface{} {
 	}
 
 	return args
+}
+
+func (q *Query) GroupBy(groupBy string) *Query {
+	q.groupBy = groupBy
+	return q
 }
 
 func (q *Query) Join(joinType string, tableName string, predicate string, columns []string, args ...interface{}) *Query {
@@ -107,6 +113,11 @@ func (q *Query) String() string {
 		}
 
 		query += " WHERE (" + strings.Join(predicates, ") AND (") + ")"
+	}
+
+	// Build up the group by clause
+	if len(q.groupBy) > 0 {
+		query += " GROUP BY " + q.groupBy
 	}
 
 	// Build up the order by clause

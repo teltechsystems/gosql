@@ -26,6 +26,19 @@ func TestQuery(t *testing.T) {
 	})
 }
 
+func TestQueryGroupBy(t *testing.T) {
+	Convey("With a simple GroupBy, a valid query should be returned", t, func() {
+		query := &Query{}
+
+		So(query.groupBy, ShouldEqual, "")
+		query.From("users", []string{"id"}).
+			GroupBy("users.id")
+		So(query.groupBy, ShouldEqual, "users.id")
+
+		So(query.String(), ShouldEqual, "SELECT users.id FROM users GROUP BY users.id")
+	})
+}
+
 func TestQueryJoin(t *testing.T) {
 	Convey("With a single join, a valid query should be returned", t, func() {
 		query := &Query{}
