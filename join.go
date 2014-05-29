@@ -8,5 +8,5 @@ var (
 type join struct {
 	joinType  string
 	table     table
-	predicate string
+	wherePart wherePart
 }

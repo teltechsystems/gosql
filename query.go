@@ -21,6 +21,14 @@ func (q *Query) From(tableName string, columns []string) *Query {
 func (q *Query) getArgs() []interface{} {
 	args := make([]interface{}, 0)
 
+	// Append all of the args consumed by joins
+	for i := range q.joins {
+		for j := range q.joins[i].wherePart.args {
+			args = append(args, q.joins[i].wherePart.args[j])
+		}
+	}
+
+	// Append all of the args consumed by where conditions
 	for i := range q.whereParts {
 		for j := range q.whereParts[i].args {
 			args = append(args, q.whereParts[i].args[j])
@@ -30,21 +38,22 @@ func (q *Query) getArgs() []interface{} {
 	return args
 }
 
-func (q *Query) Join(joinType string, tableName string, predicate string, columns []string) *Query {
+func (q *Query) Join(joinType string, tableName string, predicate string, columns []string, args ...interface{}) *Query {
 	q.joins = append(q.joins, join{
 		joinType:  joinType,
 		table:     table{tableName, columns},
-		predicate: predicate,
+		wherePart: wherePart{predicate, args},
 	})
+
 	return q
 }
 
-func (q *Query) InnerJoin(tableName string, predicate string, columns []string) *Query {
-	return q.Join(INNER_JOIN, tableName, predicate, columns)
+func (q *Query) InnerJoin(tableName string, predicate string, columns []string, args ...interface{}) *Query {
+	return q.Join(INNER_JOIN, tableName, predicate, columns, args...)
 }
 
-func (q *Query) LeftJoin(tableName string, predicate string, columns []string) *Query {
-	return q.Join(LEFT_JOIN, tableName, predicate, columns)
+func (q *Query) LeftJoin(tableName string, predicate string, columns []string, args ...interface{}) *Query {
+	return q.Join(LEFT_JOIN, tableName, predicate, columns, args...)
 }
 
 func (q *Query) OrderBy(orderByParts []string) *Query {
@@ -87,7 +96,7 @@ func (q *Query) String() string {
 
 	// Build up the joins
 	for i := range q.joins {
-		query += " " + q.joins[i].joinType + " " + q.joins[i].table.tableName + " ON " + q.joins[i].predicate
+		query += " " + q.joins[i].joinType + " " + q.joins[i].table.tableName + " ON " + q.joins[i].wherePart.predicate
 	}
 
 	// Build up the where conditions

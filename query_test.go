@@ -39,7 +39,8 @@ func TestQueryJoin(t *testing.T) {
 		So(query.joins[0].joinType, ShouldEqual, INNER_JOIN)
 		So(query.joins[0].table.tableName, ShouldEqual, "payments")
 		So(query.joins[0].table.columns, ShouldResemble, []string{"amount"})
-		So(query.joins[0].predicate, ShouldEqual, "payments.user_id = users.id")
+		So(query.joins[0].wherePart.predicate, ShouldEqual, "payments.user_id = users.id")
+		So(len(query.joins[0].wherePart.args), ShouldEqual, 0)
 
 		So(query.String(), ShouldEqual, "SELECT users.id, payments.amount FROM users INNER JOIN payments ON payments.user_id = users.id")
 	})
@@ -51,6 +52,17 @@ func TestQueryJoin(t *testing.T) {
 			Where("payments.amount > ? AND payments.is_approved", 10)
 
 		So(query.String(), ShouldEqual, "SELECT users.id, payments.amount FROM users INNER JOIN payments ON payments.user_id = users.id WHERE (payments.amount > ? AND payments.is_approved)")
+	})
+
+	Convey("With a single join with a bounded variadic, a valid query should be returned", t, func() {
+		query := &Query{}
+
+		So(len(query.getArgs()), ShouldEqual, 0)
+		query.From("users", []string{"id"}).
+			Join(INNER_JOIN, "payments", "payments.user_id = users.id AND some_statement = ?", []string{"amount"}, "hello")
+		So(len(query.getArgs()), ShouldEqual, 1)
+
+		So(query.String(), ShouldEqual, "SELECT users.id, payments.amount FROM users INNER JOIN payments ON payments.user_id = users.id AND some_statement = ?")
 	})
 }
 
