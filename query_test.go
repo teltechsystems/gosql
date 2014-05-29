@@ -12,6 +12,18 @@ func TestQuery(t *testing.T) {
 		query := &Query{}
 		So(query.String(), ShouldEqual, "")
 	})
+
+	Convey("Test a simple query to string", t, func() {
+		query := &Query{}
+		query.From("users", []string{"id"})
+		So(query.String(), ShouldEqual, "SELECT users.id FROM users")
+	})
+
+	Convey("Test a simple aliased query to string", t, func() {
+		query := &Query{}
+		query.From("users u", []string{"id"})
+		So(query.String(), ShouldEqual, "SELECT u.id FROM users u")
+	})
 }
 
 func TestQueryJoin(t *testing.T) {

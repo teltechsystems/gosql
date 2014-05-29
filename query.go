@@ -73,11 +73,12 @@ func (q *Query) String() string {
 	columns := []string{}
 
 	for i := range q.from.columns {
-		columns = append(columns, q.from.tableName+"."+q.from.columns[i])
+		columns = append(columns, q.from.GetAlias()+"."+q.from.columns[i])
 	}
+
 	for i := range q.joins {
 		for j := range q.joins[i].table.columns {
-			columns = append(columns, q.joins[i].table.tableName+"."+q.joins[i].table.columns[j])
+			columns = append(columns, q.joins[i].table.GetAlias()+"."+q.joins[i].table.columns[j])
 		}
 	}
 
