@@ -2,6 +2,7 @@ package gosql
 
 import (
 	"database/sql"
+	"fmt"
 	"strings"
 )
 
@@ -12,6 +13,12 @@ type Query struct {
 	whereParts   []wherePart
 	orderByParts []string
 	using        *sql.DB
+	pageData     *pageData
+}
+
+type pageData struct {
+	page     int
+	pageSize int
 }
 
 func (q *Query) From(tableName string, columns []string) *Query {
@@ -60,6 +67,12 @@ func (q *Query) InnerJoin(tableName string, predicate string, columns []string, 
 
 func (q *Query) LeftJoin(tableName string, predicate string, columns []string, args ...interface{}) *Query {
 	return q.Join(LEFT_JOIN, tableName, predicate, columns, args...)
+}
+
+func (q *Query) LimitPage(page, pageSize int) *Query {
+	q.pageData = &pageData{page, pageSize}
+
+	return q
 }
 
 func (q *Query) OrderBy(orderByParts []string) *Query {
@@ -131,6 +144,10 @@ func (q *Query) String() string {
 	// Build up the order by clause
 	if len(q.orderByParts) > 0 {
 		query += " ORDER BY " + strings.Join(q.orderByParts, ", ")
+	}
+
+	if q.pageData != nil {
+		query += fmt.Sprint(" LIMIT ", ((q.pageData.page - 1) * q.pageData.pageSize), ", ", q.pageData.pageSize)
 	}
 
 	return query

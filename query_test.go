@@ -107,6 +107,22 @@ func TestQueryLeftJoin(t *testing.T) {
 	})
 }
 
+func TestQueryLimitPage(t *testing.T) {
+	Convey("Make sure that page 1 translates properly into a 0 offset from the page size", t, func() {
+		query := &Query{}
+		query.From("users", []string{"id"}).LimitPage(1, 5)
+
+		So(query.String(), ShouldEqual, "SELECT users.id FROM users LIMIT 0, 5")
+	})
+
+	Convey("Make sure the offset gets multiplied properly", t, func() {
+		query := &Query{}
+		query.From("users", []string{"id"}).LimitPage(2, 10)
+
+		So(query.String(), ShouldEqual, "SELECT users.id FROM users LIMIT 10, 10")
+	})
+}
+
 func TestQueryOrderBy(t *testing.T) {
 	Convey("With a simple OrderBy, a valid query should be returned", t, func() {
 		query := &Query{}
