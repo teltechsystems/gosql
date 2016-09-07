@@ -12,7 +12,7 @@ type Query struct {
 	joins        []join
 	whereParts   []wherePart
 	orderByParts []string
-	using        *sql.DB
+	using        DB
 	pageData     *pageData
 }
 
@@ -153,7 +153,7 @@ func (q *Query) String() string {
 	return query
 }
 
-func (q *Query) Use(db *sql.DB) *Query {
+func (q *Query) Use(db DB) *Query {
 	q.using = db
 	return q
 }
