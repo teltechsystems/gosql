@@ -1,5 +1,8 @@
 Examples
 ========
+
+!!! Tests only work in Go 1.8 due to sqlite clang compiler
+
 Here are a few examples to get you started!
 
 Fetch all users
